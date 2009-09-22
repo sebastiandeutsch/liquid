@@ -11,6 +11,7 @@
 	<script src="javascripts/liquid.stage.js" type="text/javascript" charset="utf-8"></script>
 	<script src="javascripts/liquid.sprite.js" type="text/javascript" charset="utf-8"></script>
 	<script src="javascripts/liquid.image.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/scape.image.js" type="text/javascript" charset="utf-8"></script>
 	
 	<link href="stylesheets/reset.css" rel="stylesheet" type="text/css" />
 	<link href="stylesheets/master.css" rel="stylesheet" type="text/css" />
@@ -35,27 +36,53 @@
 			$('#search-canvas').get(0).width = coords.width;
 			$('#search-canvas').get(0).height = coords.height;
 			
+			var Camera = {
+				x : 0,
+				y : 0,
+				z : 6000,
+				toZ : 6000,
+				screenWidth : coords.width,
+				screenHeight : coords.height
+			};
+			
+			var Mouse = {
+				x : 0,
+				y : 0
+			};
+			
+			$('#search-canvas').mousewheel(function(event, delta) {
+				Camera.toZ -= 60*delta;
+			});
+			
+			$('#search-canvas').mousemove(function(event) {
+				Mouse.x = event.pageX;
+				Mouse.y = event.pageY;
+			});
+						
 			var imgs = [];
 			var liquid = new Liquid.initialize(document.getElementById('search-canvas'));
+			var stage = liquid.stage;
 						
 			for(var i=0; i<25; i++) {
-				var img = new Liquid.Image('images/test-' + ( i % 5 ) + '.jpg', {
-					onLoad : function(e) {
-						this.x = Math.random() * coords.width;
-						this.y = Math.random() * coords.height;
-						this.scale = Math.random() * 0.25;
-						
-						liquid.stage.addChild(this);
-						map.addImage(this);
+				var img = new Scape.Image({
+											x : 2000 - Math.random()*4000,
+											y : 2000 - Math.random()*4000,
+											z : 2000 - Math.random()*4000
+										  }, 'images/planet-earth-' + ( i % 5 ) + '.jpg', {
+					onLoad : function(e) {						
+						stage.addChild(this);
 					}
 				});
 				imgs.push(img);
 			}
 			
 			liquid.onEnterFrame = function() {
+				Camera.x += Math.round(((Mouse.x - Camera.screenWidth/2)*3/1.25 - Camera.x)/3)/10;
+				Camera.y += Math.round(((Mouse.y - Camera.screenHeight/2)*3/1.25 - Camera.y)/3)/10;
+				Camera.z += Math.round((Camera.toZ - Camera.z))/10;
+
 				for(var i=0; i<imgs.length; i++) {
-					imgs[i].x += imgs[i].scale * 5;
-					if(imgs[i].x > coords.width + 250) imgs[i].x = -250;
+					imgs[i].update(Camera);
 				}
 			}
 		});
