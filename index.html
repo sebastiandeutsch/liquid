@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>HTML5 Visual Search</title>
+ 
+	<script src="javascripts/jquery-1.3.2.min.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/jquery.mousewheel.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/jquery.clientcoords.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/liquid.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/liquid.stage.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/liquid.sprite.js" type="text/javascript" charset="utf-8"></script>
+	<script src="javascripts/liquid.image.js" type="text/javascript" charset="utf-8"></script>
+	
+	<link href="stylesheets/reset.css" rel="stylesheet" type="text/css" />
+	<link href="stylesheets/master.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+	<div class="page-align">
+		<header id="header">
+			<form id="search-form">
+				<div>Search Term: <input id="search-input" name="search-input" /></div>
+			</form>
+			<h1>Image Search</h1>
+			<div><a href="#" id="color-switch-button">White</a></div>
+		</header>
+		<div id="content">
+			<canvas width="1400" height="600" id="search-canvas" ></canvas>
+		</div>
+	</div>
+	<script>
+		jQuery(function () {
+			var coords = jQuery.clientCoords();
+			coords.height = coords.height - 32;
+			$('#search-canvas').get(0).width = coords.width;
+			$('#search-canvas').get(0).height = coords.height;
+			
+			var imgs = [];
+			var liquid = new Liquid.initialize(document.getElementById('search-canvas'));
+						
+			for(var i=0; i<25; i++) {
+				var img = new Liquid.Image('images/test-' + ( i % 5 ) + '.jpg', {
+					onLoad : function(e) {
+						this.x = Math.random() * coords.width;
+						this.y = Math.random() * coords.height;
+						this.scale = Math.random() * 0.25;
+						
+						liquid.stage.addChild(this);
+						map.addImage(this);
+					}
+				});
+				imgs.push(img);
+			}
+			
+			liquid.onEnterFrame = function() {
+				for(var i=0; i<imgs.length; i++) {
+					imgs[i].x += imgs[i].scale * 5;
+					if(imgs[i].x > coords.width + 250) imgs[i].x = -250;
+				}
+			}
+		});
+	</script>
+</body>
+</html>
